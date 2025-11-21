@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import './Overlay.css';
 
-const Overlay = ({ targetSelector, visible }) => {
+const Overlay = ({ targetSelector, instruction, onNext }) => {
     const [position, setPosition] = useState(null);
 
     useEffect(() => {
-        if (!visible || !targetSelector) {
+        if (!targetSelector) {
             setPosition(null);
             return;
         }
@@ -21,39 +21,51 @@ const Overlay = ({ targetSelector, visible }) => {
                     height: rect.height,
                 });
 
-                // Scroll into view if needed
+                // Auto-scroll to element
                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                // Add click listener to the target element to proceed to next step
+                const handleClick = () => {
+                    element.removeEventListener('click', handleClick);
+                    onNext();
+                };
+                element.addEventListener('click', handleClick);
+
+                return () => element.removeEventListener('click', handleClick);
+            } else {
+                // Element not found on this page
+                setPosition(null);
             }
         };
 
         updatePosition();
         window.addEventListener('resize', updatePosition);
-        window.addEventListener('scroll', updatePosition);
 
-        // Mutation observer to handle dynamic content changes?
-        // For now, simple polling or event listeners might suffice for the mock.
+        // Retry finding element for a short duration (in case of dynamic loading)
         const interval = setInterval(updatePosition, 500);
 
         return () => {
             window.removeEventListener('resize', updatePosition);
-            window.removeEventListener('scroll', updatePosition);
             clearInterval(interval);
         };
-    }, [targetSelector, visible]);
+    }, [targetSelector, onNext]);
 
-    if (!visible || !position) return null;
+    if (!position) return null;
 
     return (
         <div
-            className="agent-overlay-box"
+            className="overlay-highlight"
             style={{
-                top: position.top,
-                left: position.left,
-                width: position.width,
-                height: position.height,
+                top: position.top - 5,
+                left: position.left - 5,
+                width: position.width + 10,
+                height: position.height + 10,
             }}
         >
-            <div className="overlay-label">Click Here</div>
+            <div className="overlay-instruction">
+                {instruction}
+                <div className="overlay-arrow"></div>
+            </div>
         </div>
     );
 };

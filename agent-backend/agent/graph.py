@@ -4,7 +4,7 @@ from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph import StateGraph, END
 from pydantic import BaseModel, Field
-from .sitemap import get_page_elements
+from .sitemap import get_page_elements, FEATURE_KNOWLEDGE
 
 # --- Data Models ---
 class ActionStep(BaseModel):
@@ -38,15 +38,21 @@ def planner_node(state: AgentState):
     Available Interactive Elements on this page:
     {elements_str}
     
+    Global Navigation Knowledge (Where to find things):
+    {FEATURE_KNOWLEDGE}
+    
     User Query: "{query}"
     
     Your goal is to generate a sequence of actions (steps) to help the user achieve their goal.
     
     Rules:
-    1. Only use the Available Interactive Elements provided above.
-    2. If the user's goal requires navigating to another page (e.g., clicking a menu), provide the steps to get there.
-    3. If the user is already on the right page, provide the steps to perform the action.
-    4. If the user's goal is unclear or impossible on this page, provide a step with action="none" and a helpful instruction.
+    1. Check if the user's goal can be achieved with the 'Available Interactive Elements' on the CURRENT page.
+    2. If YES, provide the steps using those elements.
+    3. If NO, use the 'Global Navigation Knowledge' to find which menu/page the user needs to go to.
+       - Then, look at the 'Available Interactive Elements' to find the button/link that leads to that menu/page.
+       - Provide the step to click that menu button.
+       - Add a helpful instruction like "First, we need to go to the [Menu Name] page."
+    4. If the user is already on the right page, provide the steps to perform the action.
     5. Return a JSON object with a list of steps.
     """
     

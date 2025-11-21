@@ -5,7 +5,6 @@ SITE_MAP = {
     "/": [
         {"id": "tab-cert", "desc": "Tab to login with Digital Certificate", "selector": "#tab-cert"},
         {"id": "tab-id", "desc": "Tab to login with ID and Password", "selector": "#tab-id"},
-        {"id": "tab-qr", "desc": "Tab to login with QR Code", "selector": "#tab-qr"},
         {"id": "username", "desc": "Input field for User ID", "selector": "#username"},
         {"id": "password", "desc": "Input field for Password", "selector": "#password"},
         {"id": "btn-id-login", "desc": "Button to submit ID/Password login", "selector": "#btn-id-login"},
@@ -36,6 +35,13 @@ SITE_MAP = {
         {"id": "btn-back", "desc": "Button to go back to Dashboard", "selector": ".btn-back"},
     ]
 }
+
+# Global Knowledge: Mapping features to their parent menus/pages
+FEATURE_KNOWLEDGE = """
+- To "Pay Local Tax", "Tax Refund", "Auto-Payment", "Local Tax Certificate", "Income Certificate": Go to "Tax & Finance" menu (/tax).
+- To "Child Allowance", "Energy Voucher", "Disability Support", "Elderly Job Program": Go to "Welfare" menu (/welfare).
+- To "Resident Registration": Click the quick link on the Dashboard.
+"""
 
 def get_page_elements(url: str):
     # Simple exact match for now, can be improved to handle query params etc.

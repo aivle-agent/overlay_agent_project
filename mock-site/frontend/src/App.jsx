@@ -5,7 +5,6 @@ import DashboardPage from './pages/DashboardPage';
 import TaxPage from './pages/TaxPage';
 import WelfarePage from './pages/WelfarePage';
 import AgentSidebar from './agent/AgentSidebar';
-import './App.css';
 
 function App() {
   return (

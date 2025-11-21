@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import './AgentSidebar.css';
+import React, { useState, useEffect } from 'react';
 import Overlay from './Overlay';
+import './AgentSidebar.css';
 
 const AgentSidebar = () => {
     const [isOpen, setIsOpen] = useState(true);
-    const [messages, setMessages] = useState([
-        { role: 'agent', text: 'Hello! I am your helper. Tell me what you want to do.' }
-    ]);
     const [input, setInput] = useState('');
-    const [currentPlan, setCurrentPlan] = useState(null);
+    const [messages, setMessages] = useState([
+        { role: 'agent', text: 'Hello! I can help you navigate this site. Try saying "I want to pay tax".' }
+    ]);
+    const [currentPlan, setCurrentPlan] = useState([]);
     const [currentStepIndex, setCurrentStepIndex] = useState(-1);
 
     const handleSend = async () => {
@@ -18,84 +18,85 @@ const AgentSidebar = () => {
         setMessages(prev => [...prev, userMsg]);
         setInput('');
 
-        // Mock API call to Agent Backend
         try {
-            // In real implementation: fetch('http://localhost:8000/plan', ...)
-            // Simulating response for "login"
-            setTimeout(() => {
-                const mockPlan = [
-                    { step: 1, selector: '#tab-id', action: 'click', text: 'First, click on the "ID / Password" tab.' },
-                    { step: 2, selector: '#username', action: 'type', text: 'Click here and type your ID.' },
-                    { step: 3, selector: '#password', action: 'type', text: 'Now enter your password here.' },
-                    { step: 4, selector: '#btn-id-login', action: 'click', text: 'Finally, click the Login button.' }
-                ];
+            const response = await fetch('http://localhost:8000/plan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    query: input,
+                    current_url: window.location.pathname
+                }),
+            });
 
-                setCurrentPlan(mockPlan);
+            if (!response.ok) throw new Error('Network response was not ok');
+
+            const data = await response.json();
+
+            if (data.plan && data.plan.length > 0) {
+                setCurrentPlan(data.plan);
                 setCurrentStepIndex(0);
-                setMessages(prev => [...prev, { role: 'agent', text: 'I can help with that. Follow my lead!' }]);
-            }, 1000);
+                setMessages(prev => [...prev, { role: 'agent', text: 'I have a plan! Follow the highlighted steps.' }]);
+            } else {
+                setMessages(prev => [...prev, { role: 'agent', text: 'I am not sure what to do on this page. Try navigating to the Dashboard first.' }]);
+            }
+
         } catch (error) {
             console.error("Error fetching plan:", error);
-            setMessages(prev => [...prev, { role: 'agent', text: 'Sorry, I had trouble understanding that.' }]);
+            setMessages(prev => [...prev, { role: 'agent', text: 'Sorry, I had trouble connecting to the brain.' }]);
         }
     };
 
-    const handleNext = () => {
-        if (currentPlan && currentStepIndex < currentPlan.length - 1) {
+    const handleNextStep = () => {
+        if (currentStepIndex < currentPlan.length - 1) {
             setCurrentStepIndex(prev => prev + 1);
         } else {
-            setMessages(prev => [...prev, { role: 'agent', text: 'We are done! Great job.' }]);
-            setCurrentPlan(null);
             setCurrentStepIndex(-1);
+            setCurrentPlan([]);
+            setMessages(prev => [...prev, { role: 'agent', text: 'All steps completed!' }]);
         }
     };
 
-    const currentStep = currentPlan ? currentPlan[currentStepIndex] : null;
+    const currentStep = currentStepIndex >= 0 && currentStepIndex < currentPlan.length
+        ? currentPlan[currentStepIndex]
+        : null;
 
     return (
         <>
             <div className={`agent-sidebar ${isOpen ? 'open' : 'closed'}`}>
-                <div className="sidebar-header">
-                    <h3>Helper Agent</h3>
-                    <button onClick={() => setIsOpen(!isOpen)}>{isOpen ? 'Close' : 'Open'}</button>
+                <div className="sidebar-header" onClick={() => setIsOpen(!isOpen)}>
+                    <span>🤖 AI Helper</span>
+                    <button>{isOpen ? '▼' : '▲'}</button>
                 </div>
 
                 {isOpen && (
-                    <>
-                        <div className="chat-window">
+                    <div className="sidebar-content">
+                        <div className="messages">
                             {messages.map((msg, idx) => (
                                 <div key={idx} className={`message ${msg.role}`}>
                                     {msg.text}
                                 </div>
                             ))}
-                            {currentStep && (
-                                <div className="instruction-card">
-                                    <h4>Step {currentStep.step}</h4>
-                                    <p>{currentStep.text}</p>
-                                    <button onClick={handleNext} className="btn-next">Next Step</button>
-                                </div>
-                            )}
                         </div>
-
                         <div className="input-area">
                             <input
-                                type="text"
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                                placeholder="Type here..."
+                                placeholder="Ask for help..."
                             />
                             <button onClick={handleSend}>Send</button>
                         </div>
-                    </>
+                    </div>
                 )}
             </div>
 
-            {/* Render Overlay based on current step */}
-            <Overlay
-                targetSelector={currentStep?.selector}
-                visible={!!currentStep}
-            />
+            {currentStep && (
+                <Overlay
+                    targetSelector={currentStep.selector}
+                    instruction={currentStep.instruction}
+                    onNext={handleNextStep}
+                />
+            )}
         </>
     );
 };
