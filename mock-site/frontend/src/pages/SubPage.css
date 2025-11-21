@@ -1,0 +1,89 @@
+.subpage-container {
+    font-family: 'Noto Sans KR', sans-serif;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
+.subpage-header {
+    background-color: #1a3b5c;
+    color: white;
+    padding: 20px 30px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.subpage-header h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.btn-back {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-back:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.subpage-content {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.action-section {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    margin-bottom: 30px;
+}
+
+.action-section h2 {
+    margin-top: 0;
+    border-bottom: 2px solid #f1f3f5;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    color: #343a40;
+}
+
+.button-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 16px;
+    font-weight: bold;
+    color: #495057;
+    height: 120px;
+}
+
+.action-btn:hover {
+    background: #e7f5ff;
+    border-color: #74c0fc;
+    color: #1c7ed6;
+    transform: translateY(-2px);
+}
+
+.action-btn .icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
